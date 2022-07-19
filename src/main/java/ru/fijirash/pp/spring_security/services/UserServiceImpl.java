@@ -1,10 +1,6 @@
 package ru.fijirash.pp.spring_security.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.fijirash.pp.spring_security.dao.RoleDao;
@@ -16,15 +12,17 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
     private final RoleDao roleDao;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserDao userDao, RoleDao roleDao) {
+    public UserServiceImpl(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder) {
         this.userDao = userDao;
         this.roleDao = roleDao;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -35,7 +33,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public void addUser(User user) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(Collections.singleton(roleDao.getRoleById(2)));
         userDao.addUser(user);
@@ -60,17 +57,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public void updateUser(int id, User user) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userDao.updateUser(id, user);
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) {
-        User user = userDao.getUserByName(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found");
+        if (!user.getPassword().equals(userDao.getUser(id).getPassword())) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        return userDao.getUserByName(username);
+        userDao.updateUser(id, user);
     }
 }

@@ -6,15 +6,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import ru.fijirash.pp.spring_security.models.User;
-import ru.fijirash.pp.spring_security.services.UserServiceImpl;
+import ru.fijirash.pp.spring_security.security.UserDetailsServiceImpl;
 
 @Component
 public class UserValidator implements Validator {
 
-    private final UserServiceImpl userService;
+    private final UserDetailsServiceImpl userService;
 
     @Autowired
-    public UserValidator(UserServiceImpl userService) {
+    public UserValidator(UserDetailsServiceImpl userService) {
         this.userService = userService;
     }
 

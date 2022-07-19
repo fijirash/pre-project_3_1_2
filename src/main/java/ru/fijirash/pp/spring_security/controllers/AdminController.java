@@ -1,11 +1,13 @@
 package ru.fijirash.pp.spring_security.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.fijirash.pp.spring_security.models.User;
+import ru.fijirash.pp.spring_security.services.RoleService;
 import ru.fijirash.pp.spring_security.services.UserService;
 import ru.fijirash.pp.spring_security.util.UserValidator;
 
@@ -16,17 +18,26 @@ import javax.validation.Valid;
 public class AdminController {
 
     private final UserService userService;
+    private final RoleService roleService;
     private final UserValidator userValidator;
 
     @Autowired
-    public AdminController(UserService userService, UserValidator userValidator) {
+    public AdminController(UserService userService, RoleService roleService, UserValidator userValidator) {
         this.userService = userService;
+        this.roleService = roleService;
         this.userValidator = userValidator;
     }
 
+//    @GetMapping()
+//    public String usersList(Model model) {
+//        model.addAttribute("users", userService.getAllUsers());
+//        return "/admin/index";
+//    }
     @GetMapping()
-    public String usersList(Model model) {
+    public String showAdminPage(@AuthenticationPrincipal User user, Model model) {
         model.addAttribute("users", userService.getAllUsers());
+        model.addAttribute("user", user);
+        model.addAttribute("roles", roleService.getAllRoles());
         return "/admin/index";
     }
 
